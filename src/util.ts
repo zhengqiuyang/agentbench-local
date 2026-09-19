@@ -230,6 +230,21 @@ export function quoteArg(v: string): string {
   return '"' + v.replace(/([\\"`$])/g, '\\$1') + '"';
 }
 
+/**
+ * Escape a value that is substituted INTO an existing pair of double quotes
+ * (template form `"{{var}}"`). Re-quoting such a value produced `""path""`,
+ * which POSIX sh reads as an unquoted path — and a multi-line prompt then
+ * splits the command line, executing the tail as commands (exit 127, found
+ * on Linux CI). Windows (cmd.exe): only `"` needs handling. POSIX: also
+ * neutralise `$`, `` ` `` and `\`.
+ */
+export function escapeInDoubleQuotes(v: string): string {
+  if (process.platform === 'win32') {
+    return v.replace(/"/g, '\\"');
+  }
+  return v.replace(/([\\"`$])/g, '\\$1');
+}
+
 /** True if `p` is inside `base` (or equal), after normalization. */
 export function isWithin(base: string, p: string): boolean {
   const rel = path.relative(base, p);

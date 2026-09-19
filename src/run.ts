@@ -19,7 +19,7 @@ import path from 'node:path';
 import { gitRaw, gitText } from './git.js';
 import type { BenchConfig } from './config.js';
 import { type TaskRecord, attemptDirFor, approvedTaskIds, loadTask, workDirFor } from './tasks.js';
-import { ensureDir, nowIso, pkgRoot, quoteArg, rmrf, runShell, tail, writeJsonAtomic } from './util.js';
+import { ensureDir, escapeInDoubleQuotes, nowIso, pkgRoot, quoteArg, rmrf, runShell, tail, writeJsonAtomic } from './util.js';
 
 export const WORKDIR_INSTRUCTION = 'Work in the current directory. Do not create a new repository.';
 
@@ -56,10 +56,24 @@ export function renderCommand(
   template: string,
   vars: { prompt: string; workdir: string },
 ): string {
-  return template
-    .replace(/\{\{agentbench\}\}/g, quoteArg(pkgRoot()))
-    .replace(/\{\{workdir\}\}/g, quoteArg(vars.workdir))
-    .replace(/\{\{prompt\}\}/g, quoteArg(vars.prompt));
+  // A multi-line prompt cannot ride inside a command line: newlines terminate
+  // the command on every shell. The full prompt is always available to the
+  // agent via the AGENTBENCH_PROMPT env var.
+  const prompt = vars.prompt.replace(/\r?\n/g, ' ');
+  return subVar(subVar(subVar(template, 'agentbench', pkgRoot()), 'workdir', vars.workdir), 'prompt', prompt);
+}
+
+/**
+ * Substitute one variable, quote-context aware: `"{{var}}"` (placeholder
+ * already inside double quotes) is escaped in place, a bare `{{var}}` is
+ * wrapped in quotes. Blindly re-quoting produced `""path""`, which POSIX sh
+ * reads as an unquoted path — a multi-line prompt then split the command
+ * line and its tail executed as commands (Linux CI exit 127).
+ */
+function subVar(template: string, name: string, value: string): string {
+  const quoted = new RegExp(`"\\{\\{${name}\\}\\}"`, 'g');
+  const bare = new RegExp(`\\{\\{${name}\\}\\}`, 'g');
+  return template.replace(quoted, escapeInDoubleQuotes(value)).replace(bare, quoteArg(value));
 }
 
 /**
