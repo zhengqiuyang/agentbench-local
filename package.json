@@ -1,0 +1,32 @@
+{
+  "name": "agentbench-local",
+  "version": "0.1.0",
+  "description": "Per-repository, local, continuous benchmark harness for CLI coding agents. Mines tasks from your merged PRs, replays them headless against multiple agents, grades with the PR's own tests, and prints a local leaderboard. Nothing ever leaves your machine.",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "agentbench": "dist/src/cli.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "node run-tests.mjs",
+    "demo": "node scripts/demo.mjs"
+  },
+  "dependencies": {
+    "yaml": "^2.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.2"
+  },
+  "files": [
+    "dist",
+    "demo",
+    "scripts",
+    "README.md",
+    "LICENSE"
+  ]
+}
