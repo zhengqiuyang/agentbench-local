@@ -9,7 +9,8 @@ test('renderCommand: placeholder inside existing quotes is escaped, not re-quote
   });
   // The regression this guards: `""path""` from double-quoting, which POSIX
   // sh splits so the prompt's newlines executed as commands (Linux CI exit 127).
-  assert.ok(!cmd.includes('""'), `no double-double quotes, got: ${cmd}`);
+  // An escaped closing quote (…\"…") is fine; a bare "" pair is not.
+  assert.doesNotMatch(cmd, /(?<!\\)""/, `no unescaped double-double quotes, got: ${cmd}`);
   assert.ok(cmd.includes('line one line \\"two\\"'), `newlines collapsed, quotes escaped in place: ${cmd}`);
   assert.ok(cmd.endsWith('--workdir "/tmp/wd"'), `workdir still a single quoted arg: ${cmd}`);
 });

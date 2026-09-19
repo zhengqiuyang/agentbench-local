@@ -64,16 +64,19 @@ export function renderCommand(
 }
 
 /**
- * Substitute one variable, quote-context aware: `"{{var}}"` (placeholder
- * already inside double quotes) is escaped in place, a bare `{{var}}` is
- * wrapped in quotes. Blindly re-quoting produced `""path""`, which POSIX sh
- * reads as an unquoted path — a multi-line prompt then split the command
- * line and its tail executed as commands (Linux CI exit 127).
+ * Substitute one variable, quote-context aware: a placeholder adjacent to a
+ * double quote on either side (`"{{var}}"` or `"{{var}}/x`) is escaped in
+ * place, keeping the template's own quotes; a bare `{{var}}` is wrapped in
+ * quotes. Blindly re-quoting produced `""path""`, which POSIX sh reads as an
+ * unquoted path — a multi-line prompt then split the command line and its
+ * tail executed as commands (Linux CI exit 127).
  */
 function subVar(template: string, name: string, value: string): string {
-  const quoted = new RegExp(`"\\{\\{${name}\\}\\}"`, 'g');
-  const bare = new RegExp(`\\{\\{${name}\\}\\}`, 'g');
-  return template.replace(quoted, escapeInDoubleQuotes(value)).replace(bare, quoteArg(value));
+  const placeholder = new RegExp(`\\{\\{${name}\\}\\}`, 'g');
+  return template.replace(placeholder, (match, offset: number, whole: string) => {
+    const adjacentToQuote = whole[offset - 1] === '"' || whole[offset + match.length] === '"';
+    return adjacentToQuote ? escapeInDoubleQuotes(value) : quoteArg(value);
+  });
 }
 
 /**

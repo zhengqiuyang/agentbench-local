@@ -12,7 +12,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "node run-tests.mjs",
+    "test": "npm run build && node run-tests.mjs",
     "demo": "node scripts/demo.mjs"
   },
   "dependencies": {
