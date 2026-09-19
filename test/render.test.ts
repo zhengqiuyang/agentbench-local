@@ -23,6 +23,6 @@ test('renderCommand: bare placeholder still gets wrapped in quotes', () => {
 test('renderCommand: POSIX special characters in a quoted placeholder are neutralised', { skip: process.platform === 'win32' }, () => {
   const cmd = renderCommand('run "{{prompt}}"', { prompt: 'echo $(whoami) `id` \\home', workdir: '/w' });
   const substituted = cmd.slice('run "'.length, cmd.length - 1);
-  assert.ok(!substituted.includes('$(whoami)'), `command substitution escaped: ${cmd}`);
-  assert.ok(!substituted.includes('`id`'), `backticks escaped: ${cmd}`);
+  assert.ok(substituted.includes('\\$(whoami)'), `command substitution escaped: ${cmd}`);
+  assert.ok(substituted.includes('\\`id\\`'), `backticks escaped: ${cmd}`);
 });
