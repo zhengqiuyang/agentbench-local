@@ -1,7 +1,7 @@
 {
   "name": "agentbench-local",
   "version": "0.1.0",
-  "description": "Per-repository, local, continuous benchmark harness for CLI coding agents. Mines tasks from your merged PRs, replays them headless against multiple agents, grades with the PR's own tests, and prints a local leaderboard. Nothing ever leaves your machine.",
+  "description": "SWE-bench for YOUR repo, on YOUR machine — mines tasks from git history, grades with your own tests",
   "type": "module",
   "license": "MIT",
   "bin": {
@@ -13,7 +13,8 @@
   "scripts": {
     "build": "tsc",
     "test": "npm run build && node run-tests.mjs",
-    "demo": "node scripts/demo.mjs"
+    "demo": "node scripts/demo.mjs",
+    "prepublishOnly": "npm run build && npm test"
   },
   "dependencies": {
     "yaml": "^2.6.0"
@@ -28,5 +29,15 @@
     "scripts",
     "README.md",
     "LICENSE"
-  ]
+  ],
+  "keywords": [
+    "ai-agents",
+    "benchmark",
+    "cli",
+    "testing"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhengqiuyang/agentbench-local.git"
+  }
 }
